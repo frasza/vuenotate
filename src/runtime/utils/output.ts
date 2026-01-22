@@ -6,10 +6,10 @@ import { getShortFilePath } from './introspect'
  */
 export function formatMarkdown(annotations: Annotation[]): string {
   if (annotations.length === 0) {
-    return '## VueSpector Feedback\n\nNo annotations.'
+    return '## VueNotate Feedback\n\nNo annotations.'
   }
 
-  const lines: string[] = ['## VueSpector Feedback', '']
+  const lines: string[] = ['## VueNotate Feedback', '']
 
   annotations.forEach((annotation, index) => {
     const num = index + 1

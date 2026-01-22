@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useAreaSelection } from '../composables/useAreaSelection'
+import { useVuenotate } from '../composables/useVuenotate'
 
 const { isDragging, startPos, currentPos } = useAreaSelection()
+const { theme } = useVuenotate()
 
 const overlayStyle = computed(() => {
   if (!isDragging.value || !startPos.value || !currentPos.value) return null
@@ -27,6 +29,7 @@ const overlayStyle = computed(() => {
       v-if="isDragging && overlayStyle"
       data-vuenotate
       class="vuenotate-area-overlay"
+      :class="{ 'is-dark': theme === 'dark', 'is-light': theme === 'light' }"
       :style="overlayStyle"
     />
   </Teleport>
@@ -40,5 +43,10 @@ const overlayStyle = computed(() => {
   background: rgba(16, 185, 129, 0.15);
   border: 2px dashed #10b981;
   border-radius: 4px;
+}
+
+.vuenotate-area-overlay.is-light {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #059669;
 }
 </style>

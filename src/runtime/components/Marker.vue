@@ -8,7 +8,7 @@ const props = defineProps<{
   index: number
 }>()
 
-const { removeAnnotation, showMarkers, markerColor } = useVuenotate()
+const { removeAnnotation, showMarkers, markerColor, theme } = useVuenotate()
 
 const markerStyle = computed(() => {
   const { bounds } = props.annotation
@@ -33,7 +33,7 @@ function handleClick(event: MouseEvent) {
       v-if="showMarkers"
       data-vuenotate
       class="vuenotate-marker"
-      :class="{ 'is-area': isArea }"
+      :class="{ 'is-area': isArea, 'is-dark': theme === 'dark', 'is-light': theme === 'light' }"
       :style="markerStyle"
       :title="`Click to remove: ${annotation.note.slice(0, 50)}`"
       @click="handleClick"
@@ -75,5 +75,10 @@ function handleClick(event: MouseEvent) {
 
 .vuenotate-marker.is-area:hover {
   background: #ef4444;
+}
+
+.vuenotate-marker.is-light {
+  border-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 </style>

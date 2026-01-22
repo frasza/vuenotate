@@ -18,6 +18,8 @@ const {
   clearAfterCopy,
   setMarkerColor,
   setClearAfterCopy,
+  theme,
+  setTheme,
 } = useVuenotate()
 
 const PADDING = 20
@@ -215,7 +217,7 @@ const colors = [
     ref="toolbarRef"
     data-vuenotate
     class="vuenotate-toolbar"
-    :class="{ 'is-active': active }"
+    :class="{ 'is-active': active, 'is-dark': theme === 'dark', 'is-light': theme === 'light' }"
     :style="{
       left: `${position.x}px`,
       top: `${position.y}px`,
@@ -316,6 +318,42 @@ const colors = [
             :style="settingsStyle"
           >
             <div class="settings-group">
+              <label>Theme</label>
+              <div class="theme-toggle">
+                <button
+                  class="theme-btn"
+                  :class="{ 'is-active': theme === 'dark' }"
+                  @click="setTheme('dark')"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                  </svg>
+                  Dark
+                </button>
+                <button
+                  class="theme-btn"
+                  :class="{ 'is-active': theme === 'light' }"
+                  @click="setTheme('light')"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>
+                  Light
+                </button>
+              </div>
+            </div>
+
+            <div class="settings-divider" />
+
+            <div class="settings-group">
               <label>Marker Colour</label>
               <div class="color-grid">
                 <button
@@ -372,10 +410,18 @@ const colors = [
   align-items: center;
   gap: 4px;
   padding: 6px 8px;
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--vuenotate-bg-primary, #1a1a1a);
+  border: 1px solid var(--vuenotate-border-color, #333);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.is-light .toolbar-content {
+  --vuenotate-bg-primary: #ffffff;
+  --vuenotate-border-color: #e0e0e0;
+  --vuenotate-text-primary: #1a1a1a;
+  --vuenotate-text-secondary: #666666;
+  --vuenotate-bg-hover: #f5f5f5;
 }
 
 .toolbar-drag {
@@ -388,13 +434,13 @@ const colors = [
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: #666;
+  color: var(--vuenotate-text-secondary, #666);
   cursor: grab;
   transition: color 0.15s;
 }
 
 .toolbar-drag:hover {
-  color: #999;
+  color: var(--vuenotate-text-secondary, #999);
 }
 
 .toolbar-drag:active {
@@ -411,14 +457,18 @@ const colors = [
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: #888;
+  color: var(--vuenotate-text-secondary, #888);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .toolbar-btn:hover:not(:disabled) {
-  background: #2a2a2a;
-  color: #fff;
+  background: var(--vuenotate-bg-hover, #2a2a2a);
+  color: var(--vuenotate-text-primary, #fff);
+}
+
+.is-light .toolbar-btn:hover:not(:disabled) {
+  color: var(--vuenotate-text-primary, #1a1a1a);
 }
 
 .toolbar-btn:disabled {
@@ -435,7 +485,7 @@ const colors = [
   width: 1px;
   height: 20px;
   margin: 0 4px;
-  background: #333;
+  background: var(--vuenotate-border-color, #333);
 }
 
 .toolbar-badge {
@@ -460,12 +510,20 @@ const colors = [
   position: absolute;
   width: 200px;
   padding: 16px 16px 12px;
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--vuenotate-bg-primary, #1a1a1a);
+  border: 1px solid var(--vuenotate-border-color, #333);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  color: #fff;
+  color: var(--vuenotate-text-primary, #fff);
   z-index: 100;
+}
+
+.is-light .settings-panel {
+  --vuenotate-bg-primary: #ffffff;
+  --vuenotate-border-color: #e0e0e0;
+  --vuenotate-text-primary: #1a1a1a;
+  --vuenotate-text-secondary: #666666;
+  --vuenotate-bg-hover: #f5f5f5;
 }
 
 .settings-group {
@@ -479,7 +537,7 @@ const colors = [
 .settings-group label:not(.checkbox-label) {
   display: block;
   margin-bottom: 12px;
-  color: #888;
+  color: var(--vuenotate-text-secondary, #888);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -488,8 +546,45 @@ const colors = [
 
 .settings-divider {
   height: 1px;
-  background: #333;
+  background: var(--vuenotate-border-color, #333);
   margin: 16px -16px;
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.theme-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--vuenotate-bg-hover, #2a2a2a);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--vuenotate-text-secondary, #888);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.is-light .theme-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.theme-btn:hover {
+  border-color: var(--vuenotate-marker-color, #3b82f6);
+}
+
+.theme-btn.is-active {
+  background: var(--vuenotate-marker-color, #3b82f6);
+  color: #fff;
+  border-color: var(--vuenotate-marker-color, #3b82f6);
 }
 
 .color-grid {
@@ -538,11 +633,16 @@ const colors = [
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  background: #2a2a2a;
+  background: var(--vuenotate-bg-hover, #2a2a2a);
   border: 1px solid #444;
   border-radius: 5px;
   transition: all 0.2s;
   color: #fff;
+}
+
+.is-light .custom-checkbox {
+  background: #f5f5f5;
+  border-color: #ddd;
 }
 
 .custom-checkbox.is-checked {
@@ -559,11 +659,15 @@ const colors = [
 }
 
 .checkbox-label span {
-  color: #ccc;
+  color: var(--vuenotate-text-primary, #ccc);
   font-size: 13px;
   font-weight: 500;
   text-transform: none;
   letter-spacing: normal;
+}
+
+.is-light .checkbox-label span {
+  color: var(--vuenotate-text-primary, #333);
 }
 </style>
 

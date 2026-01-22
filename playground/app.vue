@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const count = ref(0)
-const name = ref('VueSpector')
+const name = ref('VueNotate')
 </script>
 
 <template>
@@ -66,7 +66,7 @@ const name = ref('VueSpector')
           </p>
 
           <p>
-            VueSpector captures Vue component information including the component
+            VueNotate captures Vue component information including the component
             name, file path, and props. This helps AI coding agents locate the
             exact source code you're referring to.
           </p>
@@ -96,7 +96,7 @@ const name = ref('VueSpector')
     </main>
 
     <footer class="footer">
-      <p>Press <kbd>Cmd+Shift+V</kbd> to toggle VueSpector</p>
+      <p>Press <kbd>Cmd+Shift+V</kbd> to toggle VueNotate</p>
     </footer>
   </div>
 </template>

@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
 import { inject, provide, reactive, toRefs } from 'vue'
-import type { Annotation, PendingAnnotation, Position, SelectionMode, ToolbarAnchor, VuenotateState } from '../types'
+import type { Annotation, PendingAnnotation, Position, SelectionMode, ThemeMode, ToolbarAnchor, VuenotateState } from '../types'
 import { copyToClipboard, formatMarkdown } from '../utils/output'
 
 const VUENOTATE_KEY = Symbol('vuenotate') as InjectionKey<any>
@@ -17,6 +17,7 @@ interface VuenotateReturn {
   markerColor: import('vue').Ref<string>
   clearAfterCopy: import('vue').Ref<boolean>
   toolbarAnchor: import('vue').Ref<ToolbarAnchor>
+  theme: import('vue').Ref<ThemeMode>
   toggle: () => void
   setMode: (mode: SelectionMode) => void
   setHoveredElement: (element: HTMLElement | null) => void
@@ -30,6 +31,7 @@ interface VuenotateReturn {
   setMarkerColor: (color: string) => void
   setClearAfterCopy: (clear: boolean) => void
   setToolbarAnchor: (anchor: ToolbarAnchor) => void
+  setTheme: (theme: ThemeMode) => void
   copyOutput: () => Promise<boolean>
   getOutput: () => string
 }
@@ -48,6 +50,7 @@ function createVuenotateState(): VuenotateReturn {
     toolbarAnchor: 'br',
     markerColor: '#3b82f6',
     clearAfterCopy: false,
+    theme: 'dark',
   })
 
   const stateRefs = toRefs(state)
@@ -132,6 +135,10 @@ function createVuenotateState(): VuenotateReturn {
     state.toolbarAnchor = anchor
   }
 
+  function setTheme(theme: ThemeMode) {
+    state.theme = theme
+  }
+
   async function copyOutput(): Promise<boolean> {
     const markdown = formatMarkdown(state.annotations)
     const success = await copyToClipboard(markdown)
@@ -145,7 +152,7 @@ function createVuenotateState(): VuenotateReturn {
     return formatMarkdown(state.annotations)
   }
 
-  return {
+    return {
     state,
     active: stateRefs.active,
     mode: stateRefs.mode,
@@ -157,6 +164,7 @@ function createVuenotateState(): VuenotateReturn {
     markerColor: stateRefs.markerColor,
     clearAfterCopy: stateRefs.clearAfterCopy,
     toolbarAnchor: stateRefs.toolbarAnchor,
+    theme: stateRefs.theme,
     toggle,
     setMode,
     setHoveredElement,
@@ -170,6 +178,7 @@ function createVuenotateState(): VuenotateReturn {
     setMarkerColor,
     setClearAfterCopy,
     setToolbarAnchor,
+    setTheme,
     copyOutput,
     getOutput,
   }

@@ -3,7 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useVuenotate } from '../composables/useVuenotate'
 import { getShortFilePath } from '../utils/introspect'
 
-const { pendingAnnotation, addAnnotation, cancelPending } = useVuenotate()
+const { pendingAnnotation, addAnnotation, cancelPending, theme } = useVuenotate()
 
 const note = ref('')
 const inputRef = ref<HTMLTextAreaElement | null>(null)
@@ -94,6 +94,7 @@ function handleKeyDown(event: KeyboardEvent) {
       v-if="isVisible"
       data-vuenotate
       class="vuenotate-dialog"
+      :class="{ 'is-dark': theme === 'dark', 'is-light': theme === 'light' }"
       :style="dialogStyle"
       @keydown="handleKeyDown"
     >
@@ -160,11 +161,21 @@ function handleKeyDown(event: KeyboardEvent) {
   position: fixed;
   z-index: 2147483647;
   width: 320px;
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--vuenotate-bg-primary, #1a1a1a);
+  border: 1px solid var(--vuenotate-border-color, #333);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.vuenotate-dialog.is-light {
+  --vuenotate-bg-primary: #ffffff;
+  --vuenotate-border-color: #e0e0e0;
+  --vuenotate-text-primary: #1a1a1a;
+  --vuenotate-text-secondary: #666666;
+  --vuenotate-bg-hover: #f5f5f5;
+  --vuenotate-bg-input: #fafafa;
+  --vuenotate-border-input: #e0e0e0;
 }
 
 .dialog-header {
@@ -172,7 +183,7 @@ function handleKeyDown(event: KeyboardEvent) {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--vuenotate-border-color, #333);
 }
 
 .dialog-type {
@@ -204,19 +215,23 @@ function handleKeyDown(event: KeyboardEvent) {
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: #666;
+  color: var(--vuenotate-text-secondary, #666);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .dialog-close:hover {
-  background: #2a2a2a;
-  color: #fff;
+  background: var(--vuenotate-bg-hover, #2a2a2a);
+  color: var(--vuenotate-text-primary, #fff);
+}
+
+.is-light .dialog-close:hover {
+  color: var(--vuenotate-text-primary);
 }
 
 .dialog-info {
   padding: 12px 16px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--vuenotate-border-color, #333);
 }
 
 .info-row {
@@ -232,23 +247,32 @@ function handleKeyDown(event: KeyboardEvent) {
 
 .info-label {
   flex-shrink: 0;
-  color: #666;
+  color: var(--vuenotate-text-secondary, #666);
 }
 
 .info-value {
   overflow: hidden;
   padding: 1px 4px;
-  background: #2a2a2a;
+  background: var(--vuenotate-bg-hover, #2a2a2a);
   border-radius: 3px;
-  color: #ddd;
+  color: var(--vuenotate-text-primary, #ddd);
   font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.is-light .info-value {
+  background: #f5f5f5;
+  color: #333;
+}
+
 .info-value--file {
   color: #10b981;
+}
+
+.is-light .info-value--file {
+  color: #059669;
 }
 
 .dialog-content {
@@ -258,15 +282,21 @@ function handleKeyDown(event: KeyboardEvent) {
 .dialog-input {
   width: 100%;
   padding: 10px 12px;
-  background: #0a0a0a;
-  border: 1px solid #333;
+  background: var(--vuenotate-bg-input, #0a0a0a);
+  border: 1px solid var(--vuenotate-border-input, #333);
   border-radius: 8px;
-  color: #fff;
+  color: var(--vuenotate-text-primary, #fff);
   font-family: inherit;
   font-size: 14px;
   line-height: 1.5;
   resize: none;
   transition: border-color 0.15s;
+}
+
+.is-light .dialog-input {
+  background: var(--vuenotate-bg-input);
+  border: 1px solid var(--vuenotate-border-input);
+  color: var(--vuenotate-text-primary);
 }
 
 .dialog-input:focus {
@@ -278,12 +308,16 @@ function handleKeyDown(event: KeyboardEvent) {
   color: #555;
 }
 
+.is-light .dialog-input::placeholder {
+  color: #999;
+}
+
 .dialog-footer {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
   padding: 12px 16px;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--vuenotate-border-color, #333);
 }
 
 .dialog-btn {
@@ -297,18 +331,34 @@ function handleKeyDown(event: KeyboardEvent) {
 }
 
 .dialog-btn--cancel {
-  background: #2a2a2a;
-  color: #999;
+  background: var(--vuenotate-bg-hover, #2a2a2a);
+  color: var(--vuenotate-text-secondary, #999);
+}
+
+.is-light .dialog-btn--cancel {
+  background: #f5f5f5;
+  color: #666;
 }
 
 .dialog-btn--cancel:hover {
-  background: #333;
-  color: #fff;
+  background: var(--vuenotate-border-color, #333);
+  color: var(--vuenotate-text-primary, #fff);
+}
+
+.is-light .dialog-btn--cancel:hover {
+  background: #e5e5e5;
+  color: #1a1a1a;
 }
 
 .dialog-btn--add {
   background: #3b82f6;
   color: #fff;
+}
+
+.is-light .dialog-btn--add:disabled {
+  background: #e0e0e0;
+  color: #a0a0a0;
+  opacity: 1;
 }
 
 .dialog-btn--add:hover:not(:disabled) {

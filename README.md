@@ -91,7 +91,7 @@ onMounted(() => {
 ### Output Format
 
 ```markdown
-## VueSpector Feedback
+## VueNotate Feedback
 
 ### 1. ProductCard
 **Selector**: `[data-testid="product-card"]`

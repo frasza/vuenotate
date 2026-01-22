@@ -2,6 +2,8 @@ export type AnnotationType = 'element' | 'text' | 'area'
 
 export type SelectionMode = 'idle' | 'element' | 'text' | 'area'
 
+export type ThemeMode = 'dark' | 'light'
+
 export type ToolbarAnchor = 'tl' | 'tc' | 'tr' | 'cl' | 'cr' | 'bl' | 'bc' | 'br'
 
 export interface Position {
@@ -57,4 +59,5 @@ export interface VuenotateState {
   toolbarAnchor: ToolbarAnchor
   markerColor: string
   clearAfterCopy: boolean
+  theme: ThemeMode
 }

@@ -4,7 +4,7 @@ import { useVuenotate } from '../composables/useVuenotate'
 import { getVueComponentInfo } from '../utils/introspect'
 import { getElementName } from '../utils/selector'
 
-const { hoveredElement, active, mode, markerColor } = useVuenotate()
+const { hoveredElement, active, mode, markerColor, theme } = useVuenotate()
 
 const overlayStyle = computed(() => {
   if (!hoveredElement.value) return null
@@ -42,6 +42,7 @@ const isVisible = computed(() => {
       v-if="isVisible && overlayStyle"
       data-vuenotate
       class="vuenotate-overlay"
+      :class="{ 'is-dark': theme === 'dark', 'is-light': theme === 'light' }"
       :style="overlayStyle"
     >
       <div class="overlay-label" :style="{ backgroundColor: markerColor }">
@@ -75,5 +76,14 @@ const isVisible = computed(() => {
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.vuenotate-overlay.is-light {
+  border-color: #1d4ed8;
+  background: rgba(29, 78, 216, 0.1);
+}
+
+.vuenotate-overlay.is-light .overlay-label {
+  background: #1d4ed8;
 }
 </style>
