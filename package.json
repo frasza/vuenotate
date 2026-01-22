@@ -1,0 +1,49 @@
+{
+  "name": "vuenotate",
+  "version": "0.1.0",
+  "description": "Visual feedback tool for Vue/Nuxt - annotate elements and send structured context to AI coding agents",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/module.d.mts",
+      "import": "./dist/module.mjs"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.mts",
+      "import": "./dist/vue.mjs"
+    }
+  },
+  "main": "./dist/module.mjs",
+  "module": "./dist/module.mjs",
+  "types": "./dist/module.d.mts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "nuxt-module-build build",
+    "dev": "nuxi dev playground",
+    "dev:build": "nuxi build playground",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
+    "typecheck": "nuxi typecheck"
+  },
+  "dependencies": {
+    "@nuxt/kit": "^3.20.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@nuxt/module-builder": "^1.0.0",
+    "@nuxt/schema": "^3.20.0",
+    "nuxt": "^4.0.0",
+    "typescript": "^5.8.3",
+    "vue": "^3.5.16",
+    "vue-tsc": "^3.2.2"
+  }
+}
