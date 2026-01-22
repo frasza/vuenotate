@@ -1,6 +1,6 @@
 {
   "name": "vuenotate",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Visual feedback tool for Vue/Nuxt - annotate elements and send structured context to AI coding agents",
   "license": "MIT",
   "type": "module",
