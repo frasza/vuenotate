@@ -6,10 +6,32 @@ export function useDraggable(
   elementRef: Ref<HTMLElement | null>,
   initialPosition: Position,
   onPositionChange?: (position: Position) => void,
+  onDragEnd?: () => void,
 ) {
   const position = ref<Position>({ ...initialPosition })
   const isDragging = ref(false)
   const dragOffset = ref<Position>({ x: 0, y: 0 })
+
+  function clampToViewport(pos: Position): Position {
+    const el = elementRef.value
+    if (!el) return pos
+
+    const maxX = window.innerWidth - el.offsetWidth
+    const maxY = window.innerHeight - el.offsetHeight
+
+    return {
+      x: Math.max(0, Math.min(pos.x, maxX)),
+      y: Math.max(0, Math.min(pos.y, maxY)),
+    }
+  }
+
+  function handleResize() {
+    const clamped = clampToViewport(position.value)
+    if (clamped.x !== position.value.x || clamped.y !== position.value.y) {
+      position.value = clamped
+      onPositionChange?.(clamped)
+    }
+  }
 
   function handleMouseDown(event: MouseEvent) {
     const target = event.target as HTMLElement
@@ -32,14 +54,7 @@ export function useDraggable(
     const newX = event.clientX - dragOffset.value.x
     const newY = event.clientY - dragOffset.value.y
 
-    const maxX = window.innerWidth - (elementRef.value?.offsetWidth || 200)
-    const maxY = window.innerHeight - (elementRef.value?.offsetHeight || 50)
-
-    position.value = {
-      x: Math.max(0, Math.min(newX, maxX)),
-      y: Math.max(0, Math.min(newY, maxY)),
-    }
-
+    position.value = clampToViewport({ x: newX, y: newY })
     onPositionChange?.(position.value)
   }
 
@@ -47,20 +62,24 @@ export function useDraggable(
     isDragging.value = false
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
+    onDragEnd?.()
   }
 
   onMounted(() => {
     elementRef.value?.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('resize', handleResize)
   })
 
   onUnmounted(() => {
     elementRef.value?.removeEventListener('mousedown', handleMouseDown)
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
+    window.removeEventListener('resize', handleResize)
   })
 
   return {
     position,
     isDragging,
+    clampToViewport: handleResize,
   }
 }

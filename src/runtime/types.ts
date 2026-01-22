@@ -2,6 +2,8 @@ export type AnnotationType = 'element' | 'text' | 'area'
 
 export type SelectionMode = 'idle' | 'element' | 'text' | 'area'
 
+export type ToolbarAnchor = 'tl' | 'tc' | 'tr' | 'cl' | 'cr' | 'bl' | 'bc' | 'br'
+
 export interface Position {
   x: number
   y: number
@@ -52,6 +54,7 @@ export interface VuenotateState {
   pendingAnnotation: PendingAnnotation | null
   showMarkers: boolean
   toolbarPosition: Position
+  toolbarAnchor: ToolbarAnchor
   markerColor: string
   clearAfterCopy: boolean
 }

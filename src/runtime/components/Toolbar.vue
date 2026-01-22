@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useDraggable } from '../composables/useDraggable'
 import { useVuenotate } from '../composables/useVuenotate'
+import type { ToolbarAnchor } from '../types'
 
 const {
   active,
@@ -19,10 +20,15 @@ const {
   setClearAfterCopy,
 } = useVuenotate()
 
+const PADDING = 20
+
+const anchors: ToolbarAnchor[] = ['tl', 'tc', 'tr', 'cl', 'cr', 'bl', 'bc', 'br']
+const toolbarAnchor = ref<ToolbarAnchor>('br')
 const toolbarRef = ref<HTMLElement | null>(null)
 const settingsRef = ref<HTMLElement | null>(null)
 const copied = ref(false)
 const showSettings = ref(false)
+const annotationCount = computed(() => annotations.value.length)
 
 const settingsStyle = ref({
   bottom: 'calc(100% + 12px)',
@@ -30,73 +36,111 @@ const settingsStyle = ref({
   top: 'auto',
 })
 
-watch(showSettings, async (val) => {
-  if (val) {
-    await new Promise(resolve => setTimeout(resolve, 0))
-    if (!toolbarRef.value || !settingsRef.value) return
-
-    const toolbarRect = toolbarRef.value.getBoundingClientRect()
-    const settingsWidth = 200
-    const settingsHeight = 150 // Rough estimate, will refine
-
-    const spaceAbove = toolbarRect.top
-    const spaceBelow = window.innerHeight - toolbarRect.bottom
-    const spaceRight = window.innerWidth - toolbarRect.right
-    const spaceLeft = toolbarRect.left
-
-    const newStyle: any = {
-      bottom: 'auto',
-      top: 'auto',
-      left: 'auto',
-      right: 'auto',
-    }
-
-    if (spaceAbove < settingsHeight && spaceBelow > spaceAbove) {
-      newStyle.top = 'calc(100% + 12px)'
-    }
-    else {
-      newStyle.bottom = 'calc(100% + 12px)'
-    }
-
-    if (spaceRight < settingsWidth && spaceLeft > spaceRight) {
-      newStyle.right = '0'
-    }
-    else {
-      newStyle.left = '0'
-    }
-
-    settingsStyle.value = newStyle
-  }
-})
-
-const colors = [
-  '#3b82f6', // Blue
-  '#06b6d4', // Cyan
-  '#10b981', // Green
-  '#eab308', // Yellow
-  '#f97316', // Orange
-  '#ef4444', // Red
-]
-
 const { position } = useDraggable(
   toolbarRef,
   toolbarPosition.value,
   setToolbarPosition,
+  () => {
+    const nearest = getNearestAnchor(position.value.x, position.value.y)
+    if (nearest !== toolbarAnchor.value) {
+      toolbarAnchor.value = nearest
+    }
+    snapToAnchor()
+  },
 )
 
-onMounted(() => {
-  if (toolbarPosition.value.x === -1 && toolbarPosition.value.y === -1 && toolbarRef.value) {
-    const x = window.innerWidth - toolbarRef.value.offsetWidth - 20
-    const y = window.innerHeight - toolbarRef.value.offsetHeight - 20
-    setToolbarPosition({ x, y })
+let resizeObserver: ResizeObserver | null = null
+
+function getAnchorPosition(anchor: ToolbarAnchor): { x: number, y: number } {
+  const el = toolbarRef.value
+  if (!el) return { x: 0, y: 0 }
+
+  const w = el.offsetWidth
+  const h = el.offsetHeight
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+
+  const positions: Record<ToolbarAnchor, { x: number, y: number }> = {
+    tl: { x: PADDING, y: PADDING },
+    tc: { x: (vw - w) / 2, y: PADDING },
+    tr: { x: vw - w - PADDING, y: PADDING },
+    cl: { x: PADDING, y: (vh - h) / 2 },
+    cr: { x: vw - w - PADDING, y: (vh - h) / 2 },
+    bl: { x: PADDING, y: vh - h - PADDING },
+    bc: { x: (vw - w) / 2, y: vh - h - PADDING },
+    br: { x: vw - w - PADDING, y: vh - h - PADDING },
   }
-})
 
-watch(toolbarPosition, (newPos) => {
-  position.value = { ...newPos }
-}, { immediate: true })
+  return positions[anchor]
+}
 
-const annotationCount = computed(() => annotations.value.length)
+function getNearestAnchor(x: number, y: number): ToolbarAnchor {
+  let nearest: ToolbarAnchor = toolbarAnchor.value
+  let minDist = Infinity
+
+  for (const anchor of anchors) {
+    const pos = getAnchorPosition(anchor)
+    const dist = Math.hypot(pos.x - x, pos.y - y)
+    if (dist < minDist) {
+      minDist = dist
+      nearest = anchor
+    }
+  }
+
+  return nearest
+}
+
+function updateSettingsPosition() {
+  if (!toolbarRef.value || !settingsRef.value) return
+
+  const toolbarRect = toolbarRef.value.getBoundingClientRect()
+  const settingsWidth = 200
+  const settingsHeight = 180
+
+  const spaceAbove = toolbarRect.top
+  const spaceBelow = window.innerHeight - toolbarRect.bottom
+  const spaceRight = window.innerWidth - toolbarRect.right
+  const spaceLeft = toolbarRect.left
+
+  const newStyle: any = {
+    bottom: 'auto',
+    top: 'auto',
+    left: 'auto',
+    right: 'auto',
+  }
+
+  if (spaceAbove < settingsHeight && spaceBelow > spaceAbove) {
+    newStyle.top = 'calc(100% + 12px)'
+  }
+  else {
+    newStyle.bottom = 'calc(100% + 12px)'
+  }
+
+  if (spaceRight < settingsWidth && spaceLeft > spaceRight) {
+    newStyle.right = '0'
+  }
+  else {
+    newStyle.left = '0'
+  }
+
+  settingsStyle.value = newStyle
+}
+
+function snapToAnchor() {
+  const pos = getAnchorPosition(toolbarAnchor.value)
+  position.value = pos
+  setToolbarPosition(pos)
+  if (showSettings.value) {
+    updateSettingsPosition()
+  }
+}
+
+function handleResize() {
+  snapToAnchor()
+  if (showSettings.value) {
+    updateSettingsPosition()
+  }
+}
 
 async function handleCopy() {
   const success = await copyOutput()
@@ -112,6 +156,58 @@ function handleClear() {
   if (annotationCount.value === 0) return
   clearAnnotations()
 }
+
+watch(showSettings, async (val) => {
+  if (val) {
+    await new Promise(resolve => setTimeout(resolve, 0))
+    updateSettingsPosition()
+  }
+})
+
+watch(toolbarPosition, (newPos) => {
+  position.value = { ...newPos }
+}, { immediate: true })
+
+watch(active, async () => {
+  await new Promise(resolve => setTimeout(resolve, 0))
+  snapToAnchor()
+})
+
+watch(annotationCount, async () => {
+  await new Promise(resolve => setTimeout(resolve, 0))
+  snapToAnchor()
+})
+
+onMounted(() => {
+  if (toolbarPosition.value.x === -1 && toolbarPosition.value.y === -1 && toolbarRef.value) {
+    snapToAnchor()
+  } else {
+    snapToAnchor()
+  }
+
+  if (toolbarRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      snapToAnchor()
+    })
+    resizeObserver.observe(toolbarRef.value)
+  }
+
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  resizeObserver?.disconnect()
+  window.removeEventListener('resize', handleResize)
+})
+
+const colors = [
+  '#3b82f6',
+  '#06b6d4',
+  '#10b981',
+  '#eab308',
+  '#f97316',
+  '#ef4444',
+]
 </script>
 
 <template>
@@ -379,7 +475,6 @@ function handleClear() {
 .settings-group:last-child {
   margin-bottom: 0;
 }
-
 
 .settings-group label:not(.checkbox-label) {
   display: block;

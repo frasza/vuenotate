@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
 import { inject, provide, reactive, toRefs } from 'vue'
-import type { Annotation, PendingAnnotation, Position, SelectionMode, VuenotateState } from '../types'
+import type { Annotation, PendingAnnotation, Position, SelectionMode, ToolbarAnchor, VuenotateState } from '../types'
 import { copyToClipboard, formatMarkdown } from '../utils/output'
 
 const VUENOTATE_KEY = Symbol('vuenotate') as InjectionKey<any>
@@ -16,6 +16,7 @@ interface VuenotateReturn {
   toolbarPosition: import('vue').Ref<Position>
   markerColor: import('vue').Ref<string>
   clearAfterCopy: import('vue').Ref<boolean>
+  toolbarAnchor: import('vue').Ref<ToolbarAnchor>
   toggle: () => void
   setMode: (mode: SelectionMode) => void
   setHoveredElement: (element: HTMLElement | null) => void
@@ -28,6 +29,7 @@ interface VuenotateReturn {
   setToolbarPosition: (position: Position) => void
   setMarkerColor: (color: string) => void
   setClearAfterCopy: (clear: boolean) => void
+  setToolbarAnchor: (anchor: ToolbarAnchor) => void
   copyOutput: () => Promise<boolean>
   getOutput: () => string
 }
@@ -43,6 +45,7 @@ function createVuenotateState(): VuenotateReturn {
     pendingAnnotation: null,
     showMarkers: true,
     toolbarPosition: { x: -1, y: -1 },
+    toolbarAnchor: 'br',
     markerColor: '#3b82f6',
     clearAfterCopy: false,
   })
@@ -125,6 +128,10 @@ function createVuenotateState(): VuenotateReturn {
     state.clearAfterCopy = clear
   }
 
+  function setToolbarAnchor(anchor: ToolbarAnchor) {
+    state.toolbarAnchor = anchor
+  }
+
   async function copyOutput(): Promise<boolean> {
     const markdown = formatMarkdown(state.annotations)
     const success = await copyToClipboard(markdown)
@@ -149,6 +156,7 @@ function createVuenotateState(): VuenotateReturn {
     toolbarPosition: stateRefs.toolbarPosition,
     markerColor: stateRefs.markerColor,
     clearAfterCopy: stateRefs.clearAfterCopy,
+    toolbarAnchor: stateRefs.toolbarAnchor,
     toggle,
     setMode,
     setHoveredElement,
@@ -161,6 +169,7 @@ function createVuenotateState(): VuenotateReturn {
     setToolbarPosition,
     setMarkerColor,
     setClearAfterCopy,
+    setToolbarAnchor,
     copyOutput,
     getOutput,
   }
